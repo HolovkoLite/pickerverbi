@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picker Verbi Sfida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+        .timer-bar-inner {
+            transition: width 0.1s linear;
+        }
+        @keyframes zoom-in {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .countdown-animation {
+            animation: zoom-in 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-start sm:items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
+
+        <!-- Schermata Principale -->
+        <div id="main-menu">
+             <a href="https://sites.google.com/view/ludodidattica/pickerverbi" class="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out font-semibold">
+                Home
+            </a>
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-2">1vs1</h1>
+            <p class="text-center text-gray-500 mb-8">Una sfida all'ultimo verbo: chi vincerà?</p>
+            <div class="space-y-4">
+                <button onclick="showScreen('create-challenge-screen')" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Crea una sfida
+                </button>
+                <button onclick="showScreen('join-challenge-screen')" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Partecipa a una sfida
+                </button>
+                <button onclick="showScreen('review-challenge-screen')" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Rivedi sfide passate
+                </button>
+            </div>
+
+            <!-- Istruzioni -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h2 class="text-xl font-bold text-center text-gray-700 mb-4">Come si gioca</h2>
+                <ul class="space-y-3 text-gray-600 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-indigo-500 font-bold mr-2">1.</span>
+                        <span>
+                            <strong>Crea una sfida:</strong> inserisci un nickname, crea una password e condividila con un amico.
+                        </span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-green-500 font-bold mr-2">2.</span>
+                        <span>
+                            <strong>Partecipa:</strong> se un amico ti ha dato una password, inseriscila insieme al tuo nickname per iniziare.
+                        </span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-gray-500 font-bold mr-2">3.</span>
+                        <span>
+                            <strong>Come rispondere:</strong> scrivi solo il verbo coniugato, non inserire pronomi (io, tu, ...) o punteggiatura. Ad esempio, scrivi solo "amo" e non "io amo".
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Schermata Crea Sfida -->
+        <div id="create-challenge-screen" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-6">Crea una nuova sfida</h2>
+            <div class="space-y-4">
+                <input id="create-nickname" type="text" placeholder="Il tuo nickname" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input id="create-password" type="password" placeholder="Crea una password per la sfida" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button id="create-challenge-btn" onclick="createChallenge()" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300">
+                    Avvia sfida
+                </button>
+                <button onclick="showScreen('main-menu')" class="w-full text-gray-600 font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300">
+                    Indietro
+                </button>
+            </div>
+        </div>
+        
+        <!-- Schermata Partecipa a Sfida -->
+        <div id="join-challenge-screen" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-6">Partecipa a una sfida</h2>
+            <div class="space-y-4">
+                <input id="join-nickname" type="text" placeholder="Il tuo nickname" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <input id="join-password" type="password" placeholder="Password della sfida" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <button id="join-challenge-btn" onclick="joinChallenge()" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300">
+                    Unisciti
+                </button>
+                 <button onclick="showScreen('main-menu')" class="w-full text-gray-600 font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300">
+                    Indietro
+                </button>
+            </div>
+        </div>
+
+        <!-- Schermata Rivedi Sfida -->
+        <div id="review-challenge-screen" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-6">Rivedi una sfida</h2>
+            <div class="space-y-4">
+                <input id="review-password" type="password" placeholder="Password della sfida" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button id="review-challenge-btn" onclick="reviewChallenge()" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
+                    Cerca
+                </button>
+                 <button onclick="showScreen('main-menu')" class="w-full text-gray-600 font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300">
+                    Indietro
+                </button>
+            </div>
+        </div>
+
+        <!-- Schermata di Gioco -->
+        <div id="game-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <div id="question-counter" class="text-sm font-semibold text-gray-500"></div>
+                <div id="score-display" class="text-lg font-bold text-indigo-600">Punti: 0</div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                <div id="timer-bar" class="bg-indigo-600 h-2.5 rounded-full timer-bar-inner" style="width: 100%"></div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-lg text-center mb-6">
+                <h3 id="verb-infinitive" class="text-5xl font-bold mb-6 capitalize"></h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+                        <p class="text-sm opacity-80">Modo</p>
+                        <p id="question-modo" class="text-xl md:text-2xl font-semibold capitalize"></p>
+                    </div>
+                    <div class="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+                        <p class="text-sm opacity-80">Tempo</p>
+                        <p id="question-tempo" class="text-xl md:text-2xl font-semibold capitalize"></p>
+                    </div>
+                </div>
+                <div class="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+                    <p class="text-sm opacity-80">Persona</p>
+                    <p id="question-persona" class="text-xl md:text-2xl font-semibold capitalize"></p>
+                </div>
+            </div>
+
+            <input id="answer-input" type="text" placeholder="La tua risposta..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center text-lg">
+            <button onclick="submitAnswer()" class="mt-4 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300">
+                Invia
+            </button>
+        </div>
+
+        <!-- Schermata Riepilogo Sfida -->
+        <div id="summary-screen" class="hidden">
+            <h2 id="summary-title" class="text-2xl font-bold text-center mb-6">Riepilogo sfida</h2>
+            <div id="winner-announcement" class="text-center text-2xl font-bold mb-6 p-4 rounded-lg"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Riepilogo Giocatore 1 -->
+                <div id="player1-summary" class="bg-gray-50 p-4 rounded-lg"></div>
+                <!-- Riepilogo Giocatore 2 -->
+                <div id="player2-summary" class="bg-gray-50 p-4 rounded-lg"></div>
+            </div>
+             <div class="mt-6 text-center text-sm text-gray-500">
+                <p>Password della sfida: <strong id="summary-password" class="font-mono"></strong></p>
+            </div>
+            <button onclick="showScreen('main-menu')" class="mt-8 w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
+                Torna al menù
+            </button>
+        </div>
+
+        <!-- Schermata di Caricamento -->
+        <div id="loading-screen" class="hidden text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p id="loading-text" class="mt-4 text-gray-600">Caricamento...</p>
+        </div>
+
+    </div>
+
+    <!-- Modale Conto alla Rovescia -->
+    <div id="countdown-screen" class="hidden fixed inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4 z-50">
+        <div id="countdown-text" class="text-white font-bold text-9xl"></div>
+    </div>
+
+    <!-- Modale di Feedback Risposta -->
+    <div id="feedback-screen" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+            <h2 id="feedback-title" class="text-4xl font-bold mb-4"></h2>
+            <p id="correct-answer-display" class="text-lg mb-6"></p>
+            <button onclick="continueGame()" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300">
+                Prosegui
+            </button>
+        </div>
+    </div>
+
+    <!-- Modale per i messaggi generici -->
+    <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+            <p id="message-text" class="mb-4 text-lg"></p>
+            <button onclick="closeModal()" class="bg-indigo-600 text-white font-medium py-2 px-6 rounded-lg hover:bg-indigo-700 transition duration-300">OK</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importa le funzioni necessarie da Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURAZIONE E VARIABILI GLOBALI ---
+
+        const VERBS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTLUDP01J-_az5BnbiV_sj0Mdfzd9ckXoDjRfTIEgJYpdRYwK614QU4_qWsBv3YvUQrcRuhDDLd2LM8/pub?gid=0&single=true&output=csv';
+        const GAME_DURATION_MS = 30000; // 30 secondi per domanda
+        const QUESTIONS_PER_GAME = 5;
+        const EXPIRATION_HOURS = 48;
+
+        let db, auth;
+        let allVerbs = [];
+        let currentChallenge = {};
+        let currentPlayer = ''; // 'player1' or 'player2'
+        let currentQuestionIndex = 0;
+        let currentScore = 0;
+        let timerInterval;
+        let timeRemaining = GAME_DURATION_MS;
+        let isAuthReady = false; // Flag per tracciare lo stato dell'autenticazione
+        let isSubmitting = false; // Guardiano per prevenire doppi invii
+
+        // --- INIZIALIZZAZIONE FIREBASE ---
+        
+        // !!! IMPORTANTE: INSERISCI QUI LA TUA CONFIGURAZIONE FIREBASE !!!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWARkAvv8UY8h9vkja5tLZ2e9ftG5sZo4",
+            authDomain: "sfida-verbi.firebaseapp.com",
+            projectId: "sfida-verbi",
+            storageBucket: "sfida-verbi.appspot.com",
+            messagingSenderId: "495865520988",
+            appId: "1:495865520988:web:25d1d46aea9d1565ffd799",
+            measurementId: "G-DGBSGN8KX7"
+        };      
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // --- FLUSSO PRINCIPALE DELL'APPLICAZIONE ---
+
+        window.onload = async () => {
+            showLoading('Autenticazione...');
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user && !isAuthReady) {
+                    isAuthReady = true;
+                    console.log("Utente autenticato:", user.uid);
+                    document.querySelectorAll('#main-menu button').forEach(button => button.disabled = false);
+                    await loadVerbs();
+                } else if (!user) {
+                    isAuthReady = false;
+                    console.log("Utente non autenticato.");
+                }
+            });
+
+            try {
+                console.log("Tentativo di accesso anonimo.");
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Errore durante l'accesso anonimo:", error);
+                if (error.code === 'auth/operation-not-allowed') {
+                     showMessage("Errore di configurazione: l'accesso anonimo non è abilitato nella tua console Firebase. Vai su Authentication -> Metodi di accesso e abilitalo.");
+                } else {
+                     showMessage("Impossibile avviare la sessione. Controlla la tua connessione e la configurazione di Firebase.");
+                }
+            }
+        };
+        
+        async function loadVerbs() {
+            showLoading('Caricamento verbi...');
+            try {
+                const response = await fetch(VERBS_CSV_URL);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').slice(1); // Salta l'intestazione
+                
+                allVerbs = rows.map(row => {
+                    const columns = row.trim().split(',');
+                    return {
+                        infinito: columns[0]?.trim(),
+                        modo: columns[1]?.trim(),
+                        tempo: columns[2]?.trim(),
+                        persona: columns[3]?.trim(),
+                        forma: columns[4]?.trim() // La risposta corretta
+                    };
+                }).filter(v => v.infinito && v.modo && v.tempo && v.persona && v.forma);
+                
+                console.log(`Caricati ${allVerbs.length} verbi.`);
+                if (allVerbs.length < QUESTIONS_PER_GAME) {
+                    showMessage("Errore: non è stato possibile caricare abbastanza verbi per iniziare una partita.");
+                    return;
+                }
+                showScreen('main-menu');
+            } catch (error) {
+                console.error("Errore nel caricamento dei verbi:", error);
+                showMessage("Impossibile caricare l'elenco dei verbi. Controlla la connessione e ricarica.");
+            }
+        }
+
+        // --- GESTIONE DELLE SFIDE ---
+
+        window.createChallenge = async () => {
+            const nickname = document.getElementById('create-nickname').value.trim();
+            const password = document.getElementById('create-password').value.trim();
+
+            if (!nickname || !password) {
+                showMessage("Per favore, inserisci sia il nickname che la password.");
+                return;
+            }
+
+            showLoading('Creazione sfida...');
+            const challengeRef = doc(db, "challenges", password);
+            
+            try {
+                let docSnap = await getDoc(challengeRef);
+
+                // Logica di pulizia "lazy"
+                if (docSnap.exists()) {
+                    const challengeData = docSnap.data();
+                    if (challengeData.lastAccessedAt && typeof challengeData.lastAccessedAt.toDate === 'function') {
+                        const lastAccessed = challengeData.lastAccessedAt.toDate();
+                        const now = new Date();
+                        const hoursDiff = (now - lastAccessed) / (1000 * 60 * 60);
+
+                        if (hoursDiff > EXPIRATION_HOURS) {
+                            console.log(`Sfida scaduta (${password}) trovata. La elimino.`);
+                            await deleteDoc(challengeRef);
+                            docSnap = await getDoc(challengeRef);
+                        } else {
+                            showMessage("Questa password è già in uso per una sfida attiva. Scegline un'altra.");
+                            showScreen('create-challenge-screen');
+                            return;
+                        }
+                    } else {
+                         console.log(`Sfida con timestamp non valido (${password}) trovata. La elimino.`);
+                         await deleteDoc(challengeRef);
+                         docSnap = await getDoc(challengeRef);
+                    }
+                }
+
+                const challengeVerbs = [...allVerbs].sort(() => 0.5 - Math.random()).slice(0, QUESTIONS_PER_GAME);
+
+                currentChallenge = {
+                    password: password,
+                    verbs: challengeVerbs,
+                    player1: { nickname: nickname, answers: [], scores: [], totalScore: 0, completed: false },
+                    player2: { nickname: null, answers: [], scores: [], totalScore: 0, completed: false },
+                    createdAt: serverTimestamp(),
+                    lastAccessedAt: serverTimestamp()
+                };
+
+                await setDoc(challengeRef, currentChallenge);
+                currentPlayer = 'player1';
+                startGame();
+
+            } catch (error) {
+                console.error("Errore nella creazione della sfida:", error);
+                showMessage("Si è verificato un errore. Riprova.");
+                showScreen('create-challenge-screen');
+            }
+        };
+
+        window.joinChallenge = async () => {
+            const nickname = document.getElementById('join-nickname').value.trim();
+            const password = document.getElementById('join-password').value.trim();
+
+            if (!nickname || !password) {
+                showMessage("Per favore, inserisci sia il nickname che la password.");
+                return;
+            }
+
+            showLoading('Ricerca sfida...');
+            const challengeRef = doc(db, "challenges", password);
+
+            try {
+                const docSnap = await getDoc(challengeRef);
+                if (!docSnap.exists()) {
+                    showMessage("Nessuna sfida trovata con questa password.");
+                    showScreen('join-challenge-screen');
+                    return;
+                }
+
+                const challengeData = docSnap.data();
+
+                if (nickname.toLowerCase() === challengeData.player1.nickname.toLowerCase()) {
+                    showMessage("Questo nickname è già stato usato dal Giocatore 1. Scegline un altro.");
+                    showScreen('join-challenge-screen');
+                    return;
+                }
+
+                if (challengeData.player2.nickname && challengeData.player2.completed) {
+                    showMessage("Questa sfida è già stata completata da entrambi i giocatori.");
+                    showScreen('join-challenge-screen');
+                    return;
+                }
+                
+                await updateDoc(challengeRef, {
+                    'player2.nickname': nickname,
+                    lastAccessedAt: serverTimestamp()
+                });
+
+                currentChallenge = challengeData;
+                currentChallenge.player2.nickname = nickname;
+                currentPlayer = 'player2';
+                startGame();
+
+            } catch (error) {
+                console.error("Errore nel partecipare alla sfida:", error);
+                showMessage("Si è verificato un errore. Riprova.");
+                showScreen('join-challenge-screen');
+            }
+        };
+        
+        window.reviewChallenge = async () => {
+            const password = document.getElementById('review-password').value.trim();
+            if (!password) {
+                showMessage("Inserisci la password della sfida da rivedere.");
+                return;
+            }
+            showLoading('Caricamento riepilogo...');
+            const challengeRef = doc(db, "challenges", password);
+            const docSnap = await getDoc(challengeRef);
+
+            if (docSnap.exists()) {
+                displaySummary(docSnap.data());
+            } else {
+                showMessage("Nessuna sfida trovata con questa password.");
+                showScreen('review-challenge-screen');
+            }
+        };
+
+        // --- LOGICA DI GIOCO ---
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            currentScore = 0;
+            currentChallenge[currentPlayer].answers = [];
+            currentChallenge[currentPlayer].scores = [];
+            document.getElementById('score-display').innerText = `Punti: 0`;
+            isSubmitting = false; 
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownScreen = document.getElementById('countdown-screen');
+            const countdownText = document.getElementById('countdown-text');
+            let count = 3;
+
+            const updateAndAnimate = (text) => {
+                countdownText.textContent = text;
+                countdownText.classList.remove('countdown-animation');
+                // Rimuove e riaggiunge la classe per riavviare l'animazione
+                void countdownText.offsetWidth; 
+                countdownText.classList.add('countdown-animation');
+            };
+            
+            updateAndAnimate(count);
+            countdownScreen.classList.remove('hidden');
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    updateAndAnimate(count);
+                } else {
+                    updateAndAnimate('Via!');
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        countdownScreen.classList.add('hidden');
+                        loadQuestion();
+                    }, 1000); // Mostra "Via!" per 1 secondo
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= QUESTIONS_PER_GAME) {
+                endGame();
+                return;
+            }
+            
+            showScreen('game-screen');
+            const verb = currentChallenge.verbs[currentQuestionIndex];
+            
+            document.getElementById('verb-infinitive').innerText = verb.infinito;
+            document.getElementById('question-modo').innerText = verb.modo;
+            document.getElementById('question-tempo').innerText = verb.tempo;
+            document.getElementById('question-persona').innerText = verb.persona;
+
+            document.getElementById('question-counter').innerText = `Domanda ${currentQuestionIndex + 1} / ${QUESTIONS_PER_GAME}`;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').focus();
+            
+            startTimer();
+        }
+
+        function startTimer() {
+            timeRemaining = GAME_DURATION_MS;
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = '100%';
+            timerBar.classList.remove('bg-red-500');
+            timerBar.classList.add('bg-indigo-600');
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining -= 100;
+                const widthPercentage = (timeRemaining / GAME_DURATION_MS) * 100;
+                timerBar.style.width = `${widthPercentage}%`;
+
+                if (timeRemaining < 10000 && !timerBar.classList.contains('bg-red-500')) {
+                    timerBar.classList.remove('bg-indigo-600');
+                    timerBar.classList.add('bg-red-500');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitAnswer(true); // Timeout
+                }
+            }, 100);
+        }
+
+        window.submitAnswer = (isTimeout = false) => {
+            if (isSubmitting) return; // Impedisce l'esecuzione multipla
+            isSubmitting = true; // Imposta il blocco
+
+            clearInterval(timerInterval);
+            const userAnswer = document.getElementById('answer-input').value.trim().toLowerCase();
+            const correctAnswer = currentChallenge.verbs[currentQuestionIndex].forma.toLowerCase();
+            
+            let points = 0;
+            const isCorrect = !isTimeout && userAnswer === correctAnswer;
+            if (isCorrect) {
+                points = Math.floor(timeRemaining / 10);
+            }
+
+            currentScore += points;
+            currentChallenge[currentPlayer].answers.push(userAnswer || "[Nessuna risposta]");
+            currentChallenge[currentPlayer].scores.push(points);
+
+            document.getElementById('score-display').innerText = `Punti: ${currentScore}`;
+            
+            showFeedbackModal(isCorrect, correctAnswer);
+        };
+
+        function showFeedbackModal(isCorrect, correctAnswer) {
+            const feedbackScreen = document.getElementById('feedback-screen');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const correctAnswerDisplay = document.getElementById('correct-answer-display');
+
+            if (isCorrect) {
+                feedbackTitle.textContent = "Corretto!";
+                feedbackTitle.className = "text-4xl font-bold mb-4 text-green-500";
+                correctAnswerDisplay.textContent = "";
+            } else {
+                feedbackTitle.textContent = "Sbagliato!";
+                feedbackTitle.className = "text-4xl font-bold mb-4 text-red-500";
+                correctAnswerDisplay.innerHTML = `La risposta corretta era: <strong class="text-gray-800">${correctAnswer}</strong>`;
+            }
+            feedbackScreen.classList.remove('hidden');
+        }
+
+        window.continueGame = () => {
+            document.getElementById('feedback-screen').classList.add('hidden');
+            currentQuestionIndex++;
+            isSubmitting = false; // Rimuove il blocco per la domanda successiva
+            loadQuestion();
+        }
+
+        async function endGame() {
+            showLoading('Salvataggio risultati...');
+            currentChallenge[currentPlayer].totalScore = currentScore;
+            currentChallenge[currentPlayer].completed = true;
+            
+            const challengeRef = doc(db, "challenges", currentChallenge.password);
+            
+            try {
+                const updateData = {};
+                updateData[`${currentPlayer}.answers`] = currentChallenge[currentPlayer].answers;
+                updateData[`${currentPlayer}.scores`] = currentChallenge[currentPlayer].scores;
+                updateData[`${currentPlayer}.totalScore`] = currentChallenge[currentPlayer].totalScore;
+                updateData[`${currentPlayer}.completed`] = true;
+                updateData.lastAccessedAt = serverTimestamp();
+                
+                await updateDoc(challengeRef, updateData);
+
+                const finalDoc = await getDoc(challengeRef);
+                displaySummary(finalDoc.data());
+
+            } catch (error) {
+                console.error("Errore nel salvataggio dei risultati:", error);
+                showMessage("Impossibile salvare i risultati. Riprova.");
+            }
+        }
+
+        // --- GESTIONE UI ---
+
+        const screens = ['main-menu', 'create-challenge-screen', 'join-challenge-screen', 'review-challenge-screen', 'game-screen', 'summary-screen', 'loading-screen'];
+        
+        window.showScreen = (screenId) => {
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showLoading(message) {
+            document.getElementById('loading-text').innerText = message;
+            showScreen('loading-screen');
+        }
+
+        function displaySummary(data) {
+            document.getElementById('summary-password').textContent = data.password;
+            
+            const p1 = data.player1;
+            const p2 = data.player2;
+
+            // Riepilogo Giocatore 1
+            let p1SummaryHTML = `<h3 class="text-xl font-bold mb-3 text-indigo-700">${p1.nickname}</h3>`;
+            p1SummaryHTML += `<p class="text-2xl font-bold mb-4">Punteggio: ${p1.totalScore}</p>`;
+            p1SummaryHTML += '<ul class="space-y-2 text-sm">';
+            data.verbs.forEach((verb, i) => {
+                if(p1.answers[i] !== undefined) {
+                    const correct = p1.answers[i]?.toLowerCase() === verb.forma.toLowerCase();
+                    const icon = correct ? '✔️' : '❌';
+                    const fullQuestion = `${verb.infinito} (${verb.modo} ${verb.tempo} ${verb.persona})`;
+                    p1SummaryHTML += `<li class="flex justify-between"><span>${icon} ${fullQuestion}: <strong>${p1.answers[i] || '...'}</strong></span> <span class="font-semibold">${p1.scores[i]}</span></li>`;
+                }
+            });
+            p1SummaryHTML += '</ul>';
+            document.getElementById('player1-summary').innerHTML = p1SummaryHTML;
+
+            // Riepilogo Giocatore 2
+            let p2SummaryHTML = '';
+            if (p2.nickname) {
+                p2SummaryHTML += `<h3 class="text-xl font-bold mb-3 text-green-700">${p2.nickname}</h3>`;
+                p2SummaryHTML += `<p class="text-2xl font-bold mb-4">Punteggio: ${p2.totalScore}</p>`;
+                if (p2.completed) {
+                    p2SummaryHTML += '<ul class="space-y-2 text-sm">';
+                    data.verbs.forEach((verb, i) => {
+                        if(p2.answers[i] !== undefined) {
+                            const correct = p2.answers[i]?.toLowerCase() === verb.forma.toLowerCase();
+                            const icon = correct ? '✔️' : '❌';
+                            const fullQuestion = `${verb.infinito} (${verb.modo} ${verb.tempo} ${verb.persona})`;
+                            p2SummaryHTML += `<li class="flex justify-between"><span>${icon} ${fullQuestion}: <strong>${p2.answers[i] || '...'}</strong></span> <span class="font-semibold">${p2.scores[i]}</span></li>`;
+                        }
+                    });
+                     p2SummaryHTML += '</ul>';
+                } else {
+                    p2SummaryHTML += '<p class="text-gray-500">In attesa che il giocatore completi la sfida...</p>';
+                }
+            } else {
+                p2SummaryHTML = `<h3 class="text-xl font-bold mb-3 text-gray-500">Giocatore 2</h3>`;
+                p2SummaryHTML += '<p class="text-gray-500">In attesa di un avversario...</p>';
+            }
+            document.getElementById('player2-summary').innerHTML = p2SummaryHTML;
+
+            // Annuncio vincitore
+            const winnerDiv = document.getElementById('winner-announcement');
+            winnerDiv.classList.add('hidden');
+            if (p1.completed && p2.completed) {
+                let winnerText = '';
+                winnerDiv.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-indigo-100', 'text-indigo-800', 'bg-gray-100', 'text-gray-800');
+                if (p1.totalScore > p2.totalScore) {
+                    winnerText = `🏆 Vince ${p1.nickname}! 🏆`;
+                    winnerDiv.classList.add('bg-indigo-100', 'text-indigo-800');
+                } else if (p2.totalScore > p1.totalScore) {
+                    winnerText = `🏆 Vince ${p2.nickname}! 🏆`;
+                    winnerDiv.classList.add('bg-green-100', 'text-green-800');
+                } else {
+                    winnerText = "Pareggio!";
+                    winnerDiv.classList.add('bg-gray-100', 'text-gray-800');
+                }
+                winnerDiv.innerText = winnerText;
+            }
+
+            showScreen('summary-screen');
+        }
+
+        window.showMessage = (message) => {
+            document.getElementById('message-text').innerText = message;
+            document.getElementById('message-modal').classList.remove('hidden');
+        }
+
+        window.closeModal = () => {
+            document.getElementById('message-modal').classList.add('hidden');
+        }
+        
+        // Permette di inviare la risposta con il tasto Invio
+        document.getElementById('answer-input').addEventListener('keyup', function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitAnswer();
+            }
+        });
+
+    </script>
+</body>
+</html>

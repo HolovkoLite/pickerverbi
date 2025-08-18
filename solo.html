@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coniuga il Verbo - Solitario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .app-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 2rem); /* Assicura che l'altezza sia sufficiente */
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+        }
+        .badge-bronzo { color: #b87333; }
+        .badge-argento { color: #C0C0C0; }
+        .badge-oro { color: #FFD700; }
+        .badge-diamante { color: #00BCD4; }
+        .badge-platino { color: #E5E4E2; }
+        .heart-icon {
+            font-size: 1.5rem;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="app-container-inner" class="w-full max-w-md">
+            <!-- Schermata di Gioco -->
+            <div id="game-screen" class="relative">
+                <!-- Pulsante Home per tornare alla pagina principale -->
+<a href="https://sites.google.com/view/ludodidattica/pickerverbi" class="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out font-semibold">
+                Home
+            </a>
+                
+                <div class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-md border border-gray-200 mx-auto mt-8 mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-8">Solo mode</h1>
+
+                    <!-- Sezione Contatore e Badge per Solitario -->
+                    <div id="solo-stats" class="flex justify-between items-center bg-gray-100 p-2 rounded-lg mb-3 shadow-sm">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600">Risp. consecutive:</p>
+                            <p id="consecutive-count-display" class="text-lg sm:text-xl font-bold text-green-700">0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600">Tot. verbi:</p>
+                            <p id="correct-count-display" class="text-lg sm:text-xl font-bold text-blue-700">0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600">Il tuo badge:</p>
+                            <p id="badge-display" class="text-lg sm:text-xl font-bold text-purple-700">Nessuno</p>
+                        </div>
+                    </div>
+                    
+                    <div id="hard-stats" class="hidden"></div>
+
+                    <div id="solo-lives-container" class="flex items-center justify-center gap-2 mb-2">
+                        <p class="text-sm font-semibold text-gray-700">Vite rimaste:</p>
+                        <div id="lives-display" class="flex gap-0.5"></div>
+                    </div>
+
+                    <div id="timer-container" class="hidden"></div>
+
+                    <!-- Verb Prompt Box -->
+                    <div id="verb-prompt" class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-6 rounded-lg mb-4 shadow-lg transform hover:scale-102 transition-transform duration-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                            <div class="col-span-1 sm:col-span-2">
+                                <p class="text-2xl sm:text-3xl font-extrabold" id="infinitive-verb">Verbo: Caricamento...</p>
+                            </div>
+                            <div class="flex flex-col items-center justify-center bg-white bg-opacity-20 rounded-md p-2">
+                                <span class="text-xs sm:text-sm opacity-80">Modo:</span>
+                                <p class="text-lg sm:text-xl font-semibold" id="verb-mood"></p>
+                            </div>
+                            <div class="flex flex-col items-center justify-center bg-white bg-opacity-20 rounded-md p-2">
+                                <span class="text-xs sm:text-sm opacity-80">Tempo:</span>
+                                <p class="text-lg sm:text-xl font-semibold" id="verb-tense"></p>
+                            </div>
+                            <div class="col-span-1 sm:col-span-2 flex flex-col items-center justify-center bg-white bg-opacity-20 rounded-md p-2">
+                                <span class="text-xs sm:text-sm opacity-80">Persona:</span>
+                                <p class="text-lg sm:text-xl font-semibold" id="verb-person"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Casella di input dell'utente -->
+                    <div class="mb-6">
+                        <label for="user-answer" class="block text-gray-700 text-sm sm:text-base font-medium mb-1">La tua risposta:</label>
+                        <p class="text-xs text-gray-500 my-1 italic">Ricorda: non inserire la persona (es. scrivi "sono", non "io sono").</p>
+                        <input type="text" id="user-answer" class="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Scrivi qui la coniugazione...">
+                    </div>
+                    
+                    <button id="submit-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                        Invia
+                    </button>
+                    
+                    <div id="result-box" class="mt-6 p-4 sm:p-5 rounded-lg text-center hidden">
+                        <p class="text-lg sm:text-xl font-semibold mb-2" id="result-message"></p>
+                        <p class="text-md sm:text-lg text-gray-700" id="correct-solution"></p>
+                        
+                        <button id="next-verb-button" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                            Prova un altro
+                        </button>
+                    </div>
+
+                    <div id="game-over-buttons" class="hidden flex justify-center space-x-4 mt-6">
+                        <a href="index.html" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md text-center">
+                            Home
+                        </a>
+                        <button id="restart-button" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                            Ricomincia
+                        </button>
+                    </div>
+
+                    <div id="solo-instructions" class="mt-6 p-4 rounded-lg bg-gray-100 border border-gray-200 shadow-sm">
+                        <h3 class="text-md sm:text-lg font-semibold text-gray-800 mb-2 text-center">Istruzioni e Obiettivi (Solitario)</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            L'obiettivo è indovinare la <b>coniugazione corretta</b> del verbo. Hai <b>3 vite</b> a disposizione. Ogni risposta sbagliata ne fa perdere una.
+                            </br>Ottieni una <b>vita extra</b> ogni 15 risposte corrette consecutive, fino a un massimo di 3 vite.
+                        </p>
+                        <p class="text-sm font-semibold text-gray-700 mb-2">
+                            Badge sbloccabili (in base ai verbi indovinati):
+                        </p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 pl-4 space-y-1">
+                            <li><b>Bronzo</b>: 5 verbi</li>
+                            <li><b>Argento</b>: 10 verbi</li>
+                            <li><b>Oro</b>: 20 verbi</li>
+                            <li><b>Diamante</b>: 50 verbi</li>
+                            <li><b>Platino</b>: 100 verbi</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="hard-instructions" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modale personalizzata per avvisi/conferme -->
+        <div id="custom-modal" class="modal">
+            <div id="modal-content" class="modal-content">
+                <p id="modal-message" class="text-lg font-semibold text-gray-800"></p>
+                <button id="modal-ok-button" class="">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTLUDP01J-_az5BnbiV_sj0Mdfzd9ckXoDjRfTIEgJYpdRYwK614QU4_qWsBv3YvUQrcRuhDDLd2LM8/pub?gid=0&single=true&output=csv';
+        let currentMode = 'solo';
+        let verbs = [];
+        let verbsLoading = false;
+        let currentVerb = null;
+        let currentConjugation = null;
+        let correctlyGuessedCount = 0;
+        let consecutiveCorrectCount = 0;
+        let currentBadge = 'Nessuno';
+        const badgeThresholds = [
+            { count: 5, level: 'Bronzo', emoji: '🥉', class: 'badge-bronzo' },
+            { count: 10, level: 'Argento', emoji: '🥈', class: 'badge-argento' },
+            { count: 20, level: 'Oro', emoji: '🥇', class: 'badge-oro' },
+            { count: 50, level: 'Diamante', emoji: '💎', class: 'badge-diamante' },
+            { count: 100, level: 'Platino', emoji: '🏆', class: 'badge-platino' }
+        ];
+        let lives = 3;
+        let timerId;
+        const hardModeTimerDuration = 20;
+        let startTime;
+        const updateInterval = 20;
+        const infinitiveVerbEl = document.getElementById('infinitive-verb');
+        const verbMoodEl = document.getElementById('verb-mood');
+        const verbTenseEl = document.getElementById('verb-tense');
+        const verbPersonEl = document.getElementById('verb-person');
+        const userAnswerInput = document.getElementById('user-answer');
+        const submitButton = document.getElementById('submit-button');
+        const resultBox = document.getElementById('result-box');
+        const resultMessageEl = document.getElementById('result-message');
+        const correctSolutionEl = document.getElementById('correct-solution');
+        const nextVerbButton = document.getElementById('next-verb-button');
+        const correctCountDisplayEl = document.getElementById('correct-count-display');
+        const consecutiveCountDisplayEl = document.getElementById('consecutive-count-display');
+        const badgeDisplayEl = document.getElementById('badge-display');
+        const livesDisplayEl = document.getElementById('lives-display');
+        const gameOverButtonsEl = document.getElementById('game-over-buttons');
+        const restartButton = document.getElementById('restart-button');
+        const customModal = document.getElementById('custom-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalMessage = document.getElementById('modal-message');
+        const modalOkButton = document.getElementById('modal-ok-button');
+        
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modalOkButton.classList.remove('hidden');
+            customModal.style.display = 'flex';
+        }
+        function hideModal() {
+            customModal.style.display = 'none';
+        }
+        function stopTimer() {
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+        }
+        function resetSoloMode() {
+            stopTimer();
+            correctlyGuessedCount = 0;
+            consecutiveCorrectCount = 0;
+            currentBadge = 'Nessuno';
+            lives = 3;
+            gameOverButtonsEl.classList.add('hidden');
+            submitButton.classList.remove('hidden');
+            updateUI();
+            newQuestion();
+        }
+        async function loadVerbsFromGoogleSheet() {
+            if (verbsLoading || verbs.length > 0) return;
+            verbsLoading = true;
+            try {
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`Errore nel caricamento del Foglio Google: ${response.statusText}`);
+                }
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                if (lines.length < 2) {
+                    showModal("Il Foglio Google non contiene dati di verbi validi. Assicurati che ci siano almeno intestazioni e una coniugazione.");
+                    return;
+                }
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                const dataLines = lines.slice(1);
+                const loadedConjugations = [];
+                dataLines.forEach(line => {
+                    const values = line.split(',').map(v => v.trim());
+                    if (values.length === headers.length) {
+                        const conj = {};
+                        headers.forEach((header, index) => {
+                            conj[header] = values[index];
+                        });
+                        loadedConjugations.push(conj);
+                    } else {
+                        console.warn(`Riga CSV con formato non valido saltata: ${line}`);
+                    }
+                });
+                verbs = transformConjugations(loadedConjugations);
+                if (verbs.length === 0) {
+                    showModal("Nessun verbo caricato dal Foglio Google. Controlla il formato dei dati nel tuo foglio.");
+                } else {
+                    newQuestion();
+                }
+            } catch (error) {
+                console.error("Errore durante il caricamento o il parsing dei verbi:", error);
+                showModal(`Errore nel caricamento dei verbi: ${error.message}. Controlla l'URL e il formato del Foglio Google.`);
+                submitButton.disabled = true;
+                nextVerbButton.disabled = true;
+                userAnswerInput.disabled = true;
+                infinitiveVerbEl.textContent = "Verbo: Errore di caricamento";
+            } finally {
+                verbsLoading = false;
+            }
+        }
+        function transformConjugations(flatConjugations) {
+            const transformedVerbs = [];
+            flatConjugations.forEach(conj => {
+                const infinitive = conj.infinitive;
+                const mood = conj.modo;
+                const tense = conj.tempo;
+                const person = conj.persona;
+                const form = conj.forma;
+                if (!infinitive || !mood || !tense || !person || !form) {
+                    console.warn("Coniugazione incompleta saltata:", conj);
+                    return;
+                }
+                let verbEntry = transformedVerbs.find(v =>
+                    v.infinitive === infinitive && v.mood === mood && v.tense === tense
+                );
+                if (!verbEntry) {
+                    verbEntry = {
+                        infinitive: infinitive, mood: mood, tense: tense, conjugations: []
+                    };
+                    transformedVerbs.push(verbEntry);
+                }
+                verbEntry.conjugations.push({ person: person, form: form });
+            });
+            return transformedVerbs;
+        }
+        function getRandomVerb() {
+            if (verbs.length === 0) {
+                infinitiveVerbEl.textContent = "Verbo: Nessun verbo disponibile";
+                verbMoodEl.textContent = "";
+                verbTenseEl.textContent = "";
+                verbPersonEl.textContent = "";
+                showModal("Nessun verbo disponibile. Carica verbi nel tuo Foglio Google.");
+                return;
+            }
+            const randomVerbIndex = Math.floor(Math.random() * verbs.length);
+            currentVerb = verbs[randomVerbIndex];
+            const randomConjugationIndex = Math.floor(Math.random() * currentVerb.conjugations.length);
+            currentConjugation = currentVerb.conjugations[randomConjugationIndex];
+        }
+        function displayVerbPrompt() {
+            if (!currentVerb || !currentConjugation) {
+                infinitiveVerbEl.textContent = "Verbo: Nessun verbo caricato";
+                verbMoodEl.textContent = "";
+                verbTenseEl.textContent = "";
+                verbPersonEl.textContent = "";
+                return;
+            }
+            infinitiveVerbEl.textContent = `${currentVerb.infinitive}`;
+            verbMoodEl.textContent = currentVerb.mood;
+            verbTenseEl.textContent = currentVerb.tense;
+            verbPersonEl.textContent = currentConjugation.person;
+            userAnswerInput.value = '';
+            resultBox.classList.add('hidden');
+            gameOverButtonsEl.classList.add('hidden');
+            userAnswerInput.classList.remove('border-red-500', 'border-green-500');
+            submitButton.classList.remove('hidden');
+            userAnswerInput.disabled = false;
+        }
+        function checkAnswer() {
+            if (!currentVerb || !currentConjugation) {
+                showModal("Nessun verbo da controllare. Assicurati che l'app sia stata inizializzata correttamente.");
+                return;
+            }
+            stopTimer();
+            const userAnswer = userAnswerInput.value.trim().toLowerCase();
+            const correctAnswer = currentConjugation.form.trim().toLowerCase();
+            resultBox.classList.remove('hidden');
+            submitButton.classList.add('hidden');
+            userAnswerInput.disabled = true;
+            correctSolutionEl.textContent = `Soluzione corretta: "${currentConjugation.form}"`;
+            if (userAnswer === correctAnswer) {
+                handleCorrectAnswer();
+            } else {
+                handleWrongAnswer();
+            }
+        }
+        async function handleCorrectAnswer() {
+            resultMessageEl.textContent = "Risposta corretta!";
+            resultMessageEl.className = 'text-lg sm:text-xl font-semibold mb-2 text-green-700';
+            resultBox.className = 'mt-6 p-4 sm:p-5 rounded-lg text-center bg-green-50 border border-green-200';
+            userAnswerInput.classList.remove('border-red-500');
+            userAnswerInput.classList.add('border-green-500');
+            correctlyGuessedCount++;
+            if (currentMode === 'solo') {
+                consecutiveCorrectCount++;
+                if (consecutiveCorrectCount > 0 && consecutiveCorrectCount % 15 === 0) {
+                    if (lives < 3) {
+                        lives++;
+                        showModal("Complimenti! Hai risposto correttamente a 15 domande consecutive e hai guadagnato una vita! Ora hai " + lives + " vite.");
+                    } else {
+                        showModal("Complimenti! Hai risposto correttamente a 15 domande consecutive, ma hai già il numero massimo di vite.");
+                    }
+                    updateLivesDisplay();
+                }
+            }
+            nextVerbButton.classList.remove('hidden');
+            updateUI();
+        }
+        async function handleWrongAnswer(isTimeout = false) {
+            stopTimer();
+            resultMessageEl.textContent = isTimeout ? "Tempo scaduto!" : "Risposta sbagliata!";
+            resultMessageEl.className = 'text-lg sm:text-xl font-semibold mb-2 text-red-700';
+            resultBox.className = 'mt-6 p-4 sm:p-5 rounded-lg text-center bg-red-50 border border-red-200';
+            userAnswerInput.classList.add('border-red-500');
+            userAnswerInput.classList.remove('border-green-500');
+            userAnswerInput.disabled = true;
+            if (lives > 0) {
+                 lives--;
+            }
+            if (currentMode === 'solo') {
+                consecutiveCorrectCount = 0;
+                updateLivesDisplay();
+            }
+            updateUI();
+            if (lives <= 0) {
+                const finalMessage = "Game Over! Hai esaurito le vite. Riprova!";
+                modalContent.innerHTML = `<p class="text-xl font-semibold mb-4">${finalMessage}</p><button id="modal-ok-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg transition duration-300 ease-in-out">Chiudi</button>`;
+                document.getElementById('modal-ok-button').addEventListener('click', hideModal);
+                customModal.style.display = 'flex';
+                nextVerbButton.classList.add('hidden');
+                gameOverButtonsEl.classList.remove('hidden');
+            } else {
+                nextVerbButton.classList.remove('hidden');
+            }
+        }
+        function newQuestion() {
+            stopTimer();
+            userAnswerInput.disabled = false;
+            submitButton.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            userAnswerInput.value = '';
+            userAnswerInput.focus();
+            getRandomVerb();
+            displayVerbPrompt();
+            updateLivesDisplay();
+            nextVerbButton.classList.add('hidden');
+        }
+        function checkAndAwardBadge() {
+            let highestBadgeReached = 'Nessuno';
+            let highestBadgeEmoji = '';
+            let highestBadgeClass = '';
+            for (let i = badgeThresholds.length - 1; i >= 0; i--) {
+                const threshold = badgeThresholds[i];
+                if (correctlyGuessedCount >= threshold.count) {
+                    if (currentBadge === 'Nessuno' || badgeThresholds.findIndex(b => b.level === currentBadge) < i) {
+                        currentBadge = threshold.level;
+                        showModal("Complimenti! Hai ottenuto il badge " + currentBadge + " " + threshold.emoji + " per aver indovinato " + correctlyGuessedCount + " verbi!");
+                    }
+                    highestBadgeReached = threshold.level;
+                    highestBadgeEmoji = threshold.emoji;
+                    highestBadgeClass = threshold.class;
+                    break;
+                }
+            }
+            const currentThreshold = badgeThresholds.find(b => b.level === currentBadge) || { level: 'Nessuno', emoji: '', class: '' };
+            badgeDisplayEl.innerHTML = `${currentThreshold.emoji} <span class="${currentThreshold.class}">${currentThreshold.level}</span>`;
+        }
+        function updateUI() {
+            correctCountDisplayEl.textContent = correctlyGuessedCount;
+            consecutiveCorrectCount = 0;
+            checkAndAwardBadge();
+        }
+        function updateLivesDisplay() {
+            let heartsHtml = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    heartsHtml += '<span class="heart-icon">❤️</span>';
+                } else {
+                    heartsHtml += '<span class="heart-icon opacity-30">🤍</span>';
+                }
+            }
+            livesDisplayEl.innerHTML = heartsHtml;
+        }
+        
+        // Listener per i pulsanti
+        submitButton.addEventListener('click', checkAnswer);
+        nextVerbButton.addEventListener('click', () => {
+            resultBox.classList.add('hidden');
+            newQuestion();
+        });
+        restartButton.addEventListener('click', resetSoloMode);
+        modalOkButton.addEventListener('click', hideModal);
+
+        userAnswerInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                if (submitButton.classList.contains('hidden')) {
+                    nextVerbButton.click();
+                } else if (!submitButton.classList.contains('hidden')) {
+                    checkAnswer();
+                }
+            }
+        });
+
+        // Avvia il gioco quando la pagina è completamente caricata
+        window.onload = loadVerbsFromGoogleSheet;
+    </script>
+</body>
+</html>

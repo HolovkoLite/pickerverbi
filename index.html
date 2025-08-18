@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coniugazioni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container" class="w-full max-w-md">
+        <!-- Schermata di Benvenuto -->
+        <div id="welcome-screen" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Coniuga il verbo!</h1>
+            <p class="text-gray-600 mb-8">Scegli la modalità di gioco:</p>
+            <div class="flex flex-col space-y-4">
+                <!-- Il pulsante naviga alla pagina solitario -->
+                <a href="https://sites.google.com/view/ludodidattica/pickerverbi/solo" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                    Solo mode
+                </a>
+                <!-- Il pulsante naviga alla pagina hard-mode -->
+                <a href="https://sites.google.com/view/ludodidattica/pickerverbi/hard" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                    Hard mode
+                </a>
+<!-- Il pulsante naviga alla pagina 1vs1 -->
+                <a href="https://sites.google.com/view/ludodidattica/pickerverbi/sfida" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-3 sm:p-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                    1vs1
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
