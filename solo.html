@@ -168,7 +168,7 @@
                         <h3 class="text-md sm:text-lg font-semibold text-gray-800 mb-2 text-center">Istruzioni e Obiettivi (Solitario)</h3>
                         <p class="text-sm text-gray-600 mb-4">
                             L'obiettivo è indovinare la <b>coniugazione corretta</b> del verbo. Hai <b>3 vite</b> a disposizione. Ogni risposta sbagliata ne fa perdere una.
-                            </br>Ottieni una <b>vita extra</b> ogni 10 risposte corrette consecutive, fino a un massimo di 3 vite.
+                            </br>Ottieni una <b>vita extra</b> ogni 15 risposte corrette consecutive, fino a un massimo di 3 vite.
                         </p>
                         <p class="text-sm font-semibold text-gray-700 mb-2">
                             Badge sbloccabili (in base ai verbi indovinati):
@@ -397,12 +397,12 @@
             correctlyGuessedCount++;
             if (currentMode === 'solo') {
                 consecutiveCorrectCount++;
-                if (consecutiveCorrectCount > 0 && consecutiveCorrectCount % 10 === 0) {
+                if (consecutiveCorrectCount > 0 && consecutiveCorrectCount % 15 === 0) {
                     if (lives < 3) {
                         lives++;
-                        showModal("Complimenti! Hai risposto correttamente a 10 domande consecutive e hai guadagnato una vita! Ora hai " + lives + " vite.");
+                        showModal("Complimenti! Hai risposto correttamente a 15 domande consecutive e hai guadagnato una vita! Ora hai " + lives + " vite.");
                     } else {
-                        showModal("Complimenti! Hai risposto correttamente a 10 domande consecutive, ma hai già il numero massimo di vite.");
+                        showModal("Complimenti! Hai risposto correttamente a 15 domande consecutive, ma hai già il numero massimo di vite.");
                     }
                     updateLivesDisplay();
                 }
@@ -492,6 +492,13 @@
 
         userAnswerInput.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
+                // Se la modale è visibile, premiamo il pulsante della modale
+                if (customModal.style.display === 'flex') {
+                    const btn = document.getElementById('modal-ok-button');
+                    if (btn) btn.click();
+                    return;
+                }
+
                 if (submitButton.classList.contains('hidden')) {
                     nextVerbButton.click();
                 } else if (!submitButton.classList.contains('hidden')) {
