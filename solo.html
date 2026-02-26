@@ -453,7 +453,7 @@
                 if (correctlyGuessedCount >= threshold.count) {
                     if (currentBadge === 'Nessuno' || badgeThresholds.findIndex(b => b.level === currentBadge) < i) {
                         currentBadge = threshold.level;
-                        showModal("Complimenti! Hai ottenuto il badge " + currentBadge + " " + threshold.emoji + " per aver indovinato " + correttamenteGuessedCount + " verbi!");
+                        showModal("Complimenti! Hai ottenuto il badge " + currentBadge + " " + threshold.emoji + " per aver indovinato " + correctlyGuessedCount + " verbi!");
                     }
                     break;
                 }
@@ -502,3 +502,4 @@
     </script>
 </body>
 </html>
+
