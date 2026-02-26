@@ -448,19 +448,13 @@
             nextVerbButton.classList.add('hidden');
         }
         function checkAndAwardBadge() {
-            let highestBadgeReached = 'Nessuno';
-            let highestBadgeEmoji = '';
-            let highestBadgeClass = '';
             for (let i = badgeThresholds.length - 1; i >= 0; i--) {
                 const threshold = badgeThresholds[i];
                 if (correctlyGuessedCount >= threshold.count) {
                     if (currentBadge === 'Nessuno' || badgeThresholds.findIndex(b => b.level === currentBadge) < i) {
                         currentBadge = threshold.level;
-                        showModal("Complimenti! Hai ottenuto il badge " + currentBadge + " " + threshold.emoji + " per aver indovinato " + correctlyGuessedCount + " verbi!");
+                        showModal("Complimenti! Hai ottenuto il badge " + currentBadge + " " + threshold.emoji + " per aver indovinato " + correttamenteGuessedCount + " verbi!");
                     }
-                    highestBadgeReached = threshold.level;
-                    highestBadgeEmoji = threshold.emoji;
-                    highestBadgeClass = threshold.class;
                     break;
                 }
             }
@@ -469,7 +463,7 @@
         }
         function updateUI() {
             correctCountDisplayEl.textContent = correctlyGuessedCount;
-            consecutiveCorrectCount = 0;
+            consecutiveCountDisplayEl.textContent = consecutiveCorrectCount;
             checkAndAwardBadge();
         }
         function updateLivesDisplay() {
@@ -507,7 +501,4 @@
         window.onload = loadVerbsFromGoogleSheet;
     </script>
 </body>
-
 </html>
-
-
