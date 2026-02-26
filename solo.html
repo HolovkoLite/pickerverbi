@@ -298,6 +298,7 @@
                     showModal("Nessun verbo caricato dal Foglio Google. Controlla il formato dei dati nel tuo foglio.");
                 } else {
                     newQuestion();
+                    userAnswerInput.focus();
                 }
             } catch (error) {
                 console.error("Errore durante il caricamento o il parsing dei verbi:", error);
@@ -366,6 +367,7 @@
             gameOverButtonsEl.classList.add('hidden');
             userAnswerInput.classList.remove('border-red-500', 'border-green-500');
             submitButton.classList.remove('hidden');
+            userAnswerInput.readOnly = false;
             userAnswerInput.disabled = false;
         }
         function checkAnswer() {
@@ -378,7 +380,7 @@
             const correctAnswer = currentConjugation.form.trim().toLowerCase();
             resultBox.classList.remove('hidden');
             submitButton.classList.add('hidden');
-            userAnswerInput.disabled = true;
+            userAnswerInput.readOnly = true;
             correctSolutionEl.textContent = `Soluzione corretta: "${currentConjugation.form}"`;
             if (userAnswer === correctAnswer) {
                 handleCorrectAnswer();
@@ -415,7 +417,7 @@
             resultBox.className = 'mt-6 p-4 sm:p-5 rounded-lg text-center bg-red-50 border border-red-200';
             userAnswerInput.classList.add('border-red-500');
             userAnswerInput.classList.remove('border-green-500');
-            userAnswerInput.disabled = true;
+            userAnswerInput.readOnly = true;
             if (lives > 0) {
                  lives--;
             }
@@ -437,15 +439,16 @@
         }
         function newQuestion() {
             stopTimer();
+            userAnswerInput.readOnly = false;
             userAnswerInput.disabled = false;
             submitButton.classList.remove('hidden');
             resultBox.classList.add('hidden');
             userAnswerInput.value = '';
-            userAnswerInput.focus();
             getRandomVerb();
             displayVerbPrompt();
             updateLivesDisplay();
             nextVerbButton.classList.add('hidden');
+            userAnswerInput.focus();
         }
         function checkAndAwardBadge() {
             for (let i = badgeThresholds.length - 1; i >= 0; i--) {
@@ -502,5 +505,3 @@
     </script>
 </body>
 </html>
-
-
